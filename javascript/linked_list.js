@@ -1,6 +1,41 @@
 class LinkedList {
-  constructor(head = null) {
-    this.head = head;
+  constructor(head = null, tail = null, size = 0) {
+    this.head = this.checkNode(head);
+    this.tail = tail;
+    this.size = size;
+    this.setTail();
+  }
+
+  setTail(boo = true) {
+    if (this.head) {
+      if (this.head.next) {
+        let initialSize = 0
+        this.iterate((node, count) => {
+          if (!node.next) {
+            initialSize = count + 1
+          }
+          return false
+        })
+        if (boo) {
+          this.size = initialSize
+        }
+      } else {
+        this.tail = this.head
+        if (boo) {
+          this.size = 1
+        }
+      }
+    }
+  }
+
+  checkNode(node) {
+    if (node) {
+      if (node instanceof Node) {
+        return node
+      }
+    } else {
+      return null
+    }
   }
 
   iterate(callback) {
@@ -15,6 +50,9 @@ class LinkedList {
       }
 
       ++count;
+      if (!temp.next) {
+        this.tail = temp
+      }
       temp = temp.next;
     }
 
@@ -47,6 +85,8 @@ class LinkedList {
   addFirst(node) {
     node.next = this.head;
     this.head = node;
+    this.setTail(false)
+    this.size += 1;
   }
 
   // add node to end of list, no nodes should be removed
@@ -54,6 +94,7 @@ class LinkedList {
   addLast(node) {
     if (this.head === null) {
       this.head = node;
+      this.tail = node
       return;
     }
 
@@ -63,6 +104,8 @@ class LinkedList {
         return true;
       }
     });
+    this.tail = node
+    this.size += 1
   }
 
   // remove the first Node in the list and update head
@@ -73,7 +116,11 @@ class LinkedList {
     if (this.head !== null) {
       this.head = this.head.next;
     }
+    if (!this.head) {
+      this.tail = null
+    }
 
+    this.subtract()
     return oldHead;
   }
 
@@ -93,7 +140,8 @@ class LinkedList {
         return true;
       }
     });
-
+    this.setTail(false)
+    this.subtract()
     return oldTail;
   }
 
@@ -109,17 +157,17 @@ class LinkedList {
       if (count === idx - 1) {
         node.next = currNode.next.next;
         currNode.next = node;
-
+        this.setTail(false)
         return true;
       }
     });
-
     return node;
   }
 
   // insert the node at the given index
   // no existing nodes should be removed or replaced
   insert(idx, node) {
+
     if (idx === 0) {
       this.addFirst(node);
       return;
@@ -130,10 +178,14 @@ class LinkedList {
         const oldNext = currNode.next;
         currNode.next = node;
         node.next = oldNext;
-
+        this.size += 1
         return true;
       }
     });
+
+    if (idx === (this.size - 1)) {
+      this.tail = node
+    }
   }
 
   // remove the node at the given index, and return it
@@ -148,16 +200,25 @@ class LinkedList {
       if (count === idx - 1) {
         oldNode = node.next;
         node.next = node.next.next;
-
+        this.subtract()
         return true;
       }
-    }); 
-
+    });
+    if (idx === this.size) {
+      this.setTail(false)
+    }
     return oldNode;
   }
 
   clear() {
     this.head = null;
+    this.size = 0;
+  }
+
+  subtract() {
+    if (this.size > 0) {
+      this.size -= 1;
+    }
   }
 }
 
